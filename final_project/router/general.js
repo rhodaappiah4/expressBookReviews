@@ -26,52 +26,132 @@ public_users.post("/register", (req,res) => {
 
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
-  res.send(JSON.stringify({books},null,4));
+    // Create a Promise to simulate an asynchronous book fetch
+    let myPromise = new Promise((resolve, reject) => {
+        setTimeout(() => {
+        resolve(books);
+        }, 2000); // simulate 2-second async delay
+    });
+
+    console.log("Before calling promise");
+
+    // Call the promise and wait for it to resolve, then send the books
+    myPromise
+        .then((books) => {
+        console.log("From Callback: Promise resolved");
+        res.send(JSON.stringify(books,null,4));
+        })
+        .catch((error) => {
+        res.status(500).json({ message: "Error fetching books", error });
+        });
+
+    console.log("After calling promise");
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
    // Retrieve the isbn parameter from the request URL and send the corresponding book details
     const isbn = req.params.isbn;
-    res.send(books[isbn]);
+    
+    // Create a Promise that resolves after 2 seconds with the book details
+    let getBookByIsbn = new Promise((resolve, reject) => {
+        setTimeout(() => {
+        if (books[isbn]) {
+            resolve(books[isbn]);
+        } else {
+            reject("Book not found");
+        }
+        }, 2000);
+    });
+
+    console.log("Before calling promise");
+
+    getBookByIsbn
+        .then((book) => {
+        console.log("From Callback: Promise resolved");
+        res.send(book);
+        })
+        .catch((error) => {
+        res.status(404).json({ message: error });
+        });
+
+    console.log("After calling promise");
 });
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
     // Retrieve the author parameter from the request URL and send the corresponding book details
     const author = req.params.author.replace('-', ' ');
-    const matchingBooks = [];
+      
+    // Create a Promise that resolves after 2 seconds with matching books or rejects if none found
+    let getBooksByAuthor = new Promise((resolve, reject) => {
+        setTimeout(() => {
+        const matchingBooks = [];
 
-    for (let key in books) {    
-        if (books[key].author.toLowerCase() === author.toLowerCase()) {
+        for (let key in books) {
+            if (books[key].author.toLowerCase() === author.toLowerCase()) {
             matchingBooks.push(books[key]);
+            }
         }
-    }
-    if (matchingBooks.length > 0){
-        res.send(matchingBooks);
-    }
-    else{
-        return res.status(404).send({ message: 'Author not found' });
-    } 
+
+        if (matchingBooks.length > 0) {
+            resolve(matchingBooks);
+        } else {
+            reject('Author not found');
+        }
+        }, 2000);
+    });
+
+    console.log("Before calling promise");
+
+    getBooksByAuthor
+        .then((books) => {
+        console.log("From Callback: Promise resolved");
+        res.send(books);
+        })
+        .catch((error) => {
+        res.status(404).json({ message: error });
+        });
+
+    console.log("After calling promise");
 });
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
     // Retrieve the title parameter from the request URL and send the corresponding book details
     const title = req.params.title.replace('-', ' ');
-    const matchingBooks = [];
 
-    for (let key in books) {    
-        if (books[key].title.toLowerCase() === title.toLowerCase()) {
+    // Create a Promise to simulate async book search by title
+    let getBooksByTitle = new Promise((resolve, reject) => {
+        setTimeout(() => {
+        const matchingBooks = [];
+
+        for (let key in books) {
+            if (books[key].title.toLowerCase() === title.toLowerCase()) {
             matchingBooks.push(books[key]);
+            }
         }
-    }
-    if (matchingBooks.length > 0){
-        res.send(matchingBooks);
-    }
-    else{
-        return res.status(404).send({ message: 'Title not found' });
-    } 
+
+        if (matchingBooks.length > 0) {
+            resolve(matchingBooks);
+        } else {
+            reject('Title not found');
+        }
+        }, 2000); // simulate 2 sec async delay
+    });
+
+    console.log("Before calling promise");
+
+    getBooksByTitle
+        .then((books) => {
+        console.log("From Callback: Promise resolved");
+        res.send(books);
+        })
+        .catch((error) => {
+        res.status(404).json({ message: error });
+        });
+
+    console.log("After calling promise");
 });
 
 //  Get book review
